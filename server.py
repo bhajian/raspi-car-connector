@@ -8,7 +8,7 @@ import websocket
 import thread
 import time
 
-ctrl_cmd = ['car/goForward', 'car/goBackward', 'car/turnLeft/coarse', 'car/turnRight/coarse', 'car/stop', 'read cpu_temp', 'car/home', 'car/distance', 'camera/right', 'camera/left', 'camera/up', 'camera/down', 'camera/home', 'car/setSpeed']
+ctrl_cmd = ['car/goForward', 'car/goBackward', 'car/turnLeft/coarse', 'car/turnRight/coarse', 'car/stop', 'system/cpu_temp', 'car/home', 'car/distance', 'camera/right', 'camera/left', 'camera/up', 'camera/down', 'camera/home', 'car/setSpeed/', 'car/turn/angle/', 'car/forward/', 'car/backward/']
 
 video_dir.setup()
 car_dir.setup()
@@ -42,7 +42,7 @@ def on_message(ws, data):
     elif data == ctrl_cmd[5]:
         print 'read cpu temp...'
         temp = cpu_temp.read()
-        tcpCliSock.send('[%s] %0.2f' % (ctime(), temp))
+        ws.send('[%s] %0.2f' % (ctime(), temp))
     elif data == ctrl_cmd[8]:
         print 'recv x+ cmd'
         video_dir.move_increase_x()
@@ -60,34 +60,41 @@ def on_message(ws, data):
         video_dir.home_x_y()
     elif data[0:12] == ctrl_cmd[13]:     # Change the speed
         print data
-        #numLen = len(data) - len('speed')
-        #if numLen == 1 or numLen == 2 or numLen == 3:
-        #    tmp = data[-numLen:]
+        numLen = len(data) - len('car/setSpeed/')
+        if numLen == 1 or numLen == 2 or numLen == 3:
+            tmp = data[-numLen:]
         #    print 'tmp(str) = %s' % tmp
-        #    spd = int(tmp)
+            spd = int(tmp)
         #    print 'spd(int) = %d' % spd
-        #    if spd < 24:
-        #        spd = 24
-        motor.setSpeed(30)
-    elif data[0:5] == 'turn=':	#Turning Angle
-        print 'data =', data
-        angle = data.split('=')[1]
+            if spd < 24:
+                spd = 24
+        motor.setSpeed(spd)
+    elif data[0:14] == ctrl_cmd[14]:	#Turning Angle
+        #print 'data =', data
+        numLen = len(data) - len('car/turn/angle/')
+        if numLen == 1 or numLen == 2 or numLen == 3:
+            angle = data[-numLen:]
         try:
             angle = int(angle)
             car_dir.turn(angle)
         except:
             print 'Error: angle =', angle
-    elif data[0:8] == 'forward=':
-        print 'data =', data
-        spd = 30
+    elif data[0:11] == ctrl_cmd[15]:
+        numLen = len(data) - len('car/forward/')
+        if numLen == 1 or numLen == 2 or numLen == 3:
+            spd = data[-numLen:]
+        #spd = 30
         try:
             spd = int(spd)
             motor.forward(spd)
         except:
             print 'Error speed =', spd
-    elif data[0:9] == 'backward=':
+    elif data[0:12] == ctrl_cmd[16]:
         print 'data =', data
-        spd = data.split('=')[1]
+        numLen = len(data) - len('car/backward/')
+        if numLen == 1 or numLen == 2 or numLen == 3:
+            spd = data[-numLen:]
+        #spd = data.split('=')[1]
         try:
             spd = int(spd)
             motor.backward(spd)
@@ -109,6 +116,8 @@ def on_close(ws):
 def on_open(ws):
     def run(*args):
         for i in range(30000):
+            temp = cpu_temp.read()
+            ws.send('[%s] %0.2f' % (ctime(), temp))
             time.sleep(1)
         time.sleep(1)
         ws.close()
