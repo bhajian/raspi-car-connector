@@ -58,18 +58,19 @@ def on_message(ws, data):
     elif data == ctrl_cmd[12]:
         print 'home_x_y'
         video_dir.home_x_y()
-    elif data[0:12] == ctrl_cmd[13]:     # Change the speed
+    elif data[:13] == ctrl_cmd[13]:     # Change the speed
         print data
         numLen = len(data) - len('car/setSpeed/')
         if numLen == 1 or numLen == 2 or numLen == 3:
-            tmp = data[-numLen:]
+            spd = data[-numLen:]
         #    print 'tmp(str) = %s' % tmp
-            spd = int(tmp)
+            spd = int(spd)
         #    print 'spd(int) = %d' % spd
             if spd < 24:
                 spd = 24
+	    print spd
         motor.setSpeed(spd)
-    elif data[0:14] == ctrl_cmd[14]:	#Turning Angle
+    elif data[0:15] == ctrl_cmd[14]:	#Turning Angle
         #print 'data =', data
         numLen = len(data) - len('car/turn/angle/')
         if numLen == 1 or numLen == 2 or numLen == 3:
@@ -79,7 +80,7 @@ def on_message(ws, data):
             car_dir.turn(angle)
         except:
             print 'Error: angle =', angle
-    elif data[0:11] == ctrl_cmd[15]:
+    elif data[0:12] == ctrl_cmd[15]:
         numLen = len(data) - len('car/forward/')
         if numLen == 1 or numLen == 2 or numLen == 3:
             spd = data[-numLen:]
@@ -89,7 +90,7 @@ def on_message(ws, data):
             motor.forward(spd)
         except:
             print 'Error speed =', spd
-    elif data[0:12] == ctrl_cmd[16]:
+    elif data[0:13] == ctrl_cmd[16]:
         print 'data =', data
         numLen = len(data) - len('car/backward/')
         if numLen == 1 or numLen == 2 or numLen == 3:
