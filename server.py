@@ -42,7 +42,7 @@ def on_message(ws, data):
     elif data == ctrl_cmd[5]:
         print 'read cpu temp...'
         temp = cpu_temp.read()
-        ws.send('[%s] %0.2f' % (ctime(), temp))
+        ws.send('/system/cpu_temp/%0.2f' % temp)
     elif data == ctrl_cmd[8]:
         print 'recv x+ cmd'
         video_dir.move_increase_x()
